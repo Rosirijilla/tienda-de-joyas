@@ -11,7 +11,7 @@ const pool = new Pool({
 });
 
 //Func. conseguir las joyas pero con los filtros
-const obtenerJoyasFiltro = async ({precio_max, precio_min, categoria, metal})=>{
+const obtenerJoyasFiltro = async ({precio_max, precio_min, categoria, metal, order_by})=>{
     let filtros = [];
     const values = [];
     const agregarFiltro = (campo, operador, valor) =>{
@@ -27,6 +27,17 @@ const obtenerJoyasFiltro = async ({precio_max, precio_min, categoria, metal})=>{
     let consulta = "SELECT * FROM inventario";
     if (filtros.length > 0){
         consulta += ` WHERE ${filtros.join(' AND ')}`;
+    }
+
+    //Agregar el orden
+    if (order_by) {
+        const [campo, orden] = order_by.split('_');
+        const validarCampos = ['precio', 'nombre', 'stock', 'categoria', 'metal'];
+        const validarOrden = ['ASC', 'DESC'];
+
+        if (validarCampos.includes(campo) && validarOrden.includes(orden)){
+            consulta += ` ORDER BY ${campo} ${orden}`;
+        }
     }
 
     const {rows} = await pool.query(consulta, values);

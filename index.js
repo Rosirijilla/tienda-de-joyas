@@ -1,13 +1,27 @@
 //Importar
 const express = require('express');
+const fs = require('fs');
 const app = express();
 require('dotenv').config();
 const { obtenerJoyasFiltro } = require('./consultas'); //Importar desde consultas.js
+
 
 // Middlewares
 app.use(express.json());
 app.use(require('cors')());
 app.use(require('helmet')());
+
+//Reportes middleware
+const registrarActividad = (req, res, next) =>{
+    const ahora = new Date().toISOString();
+    const log = ` [${ahora}] Ruta consultada: ${req.method} ${req.path}\n`;
+
+    console.log(log);
+    fs.appendFileSync('reporte.log', log); //Guardamos el log
+    next();
+};
+
+app.use(registrarActividad);
 
 //Hateoas
 const cambiarHATEOAS = (joyas, limite)=>{
